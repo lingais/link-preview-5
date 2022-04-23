@@ -17,7 +17,7 @@ app.use((req, res, next) => {
 });
 
 app.get(`/preview`, async (req, res, next) => {
-  const params = getLinkPreviewParams(req);
+  const params = await getLinkPreviewParams(req);
   if (params.errors.length > 0) {
     return res.status(400).json(params.errors[0]);
   }

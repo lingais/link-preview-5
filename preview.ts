@@ -3,12 +3,11 @@ import { ScrapeOptions, scrapeSite, SiteData } from "./lib/scrape";
 import { isString, isValidWebUrl, stringToBoolParam } from "./utils";
 import { getExceptionSiteData } from "./utils/exceptions";
 
-export const getLinkPreviewParams = (req) => {
-  const { url, stealth, search, validate } = req.query;
+export const getLinkPreviewParams = async (req: any) => {
+  const { url, stealth } = req.query;
   let urlString = "";
   let stealthBool: boolean | undefined;
-  let searchBool: boolean | undefined;
-  let validateBool: boolean | undefined;
+
   let errors: Array<string> = [];
   if (url && isString(url)) {
     const decodedUrl = decodeURIComponent(url).toString();
@@ -28,24 +27,11 @@ export const getLinkPreviewParams = (req) => {
     } catch (err) {
       errors.push(`Stealth ${err}`);
     }
-  if (search)
-    try {
-      searchBool = stringToBoolParam(search);
-    } catch (err) {
-      errors.push(`Search ${err}`);
-    }
-  if (validate)
-    try {
-      validateBool = stringToBoolParam(validate);
-    } catch (err) {
-      errors.push(`Validate ${err}`);
-    }
+
   return {
     data: {
       url: urlString,
       stealth: stealthBool,
-      search: searchBool,
-      validate: validateBool,
     },
     errors: errors,
   };
