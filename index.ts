@@ -27,9 +27,7 @@ app.get(`/preview`, async (req, res, next) => {
 
   const preview = await getLinkPreviewData(
     params.data.url,
-    params.data?.stealth,
-    params.data?.search,
-    params.data?.validate
+    params.data?.stealth
   );
 
   return res.status(200).json(preview);
