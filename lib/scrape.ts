@@ -40,10 +40,11 @@ export const scrapeSite = async (url: string, options?: ScrapeOptions) => {
 
   // First try standard request using axios
   try {
-    const res = await axios.get(url);
+    console.log("axios calling", url);
+    const res = await axios.get(url.toString());
     html = res.data;
   } catch (err) {
-    console.log(err);
+    console.log("error calling", url);
     errors.push(err);
   }
 
@@ -56,13 +57,12 @@ export const scrapeSite = async (url: string, options?: ScrapeOptions) => {
   // Then if no site data OR site image found try stealth puppeteer with searching for largest image
   if (
     options?.stealth !== false &&
-    (siteData === undefined || siteData.image === undefined)
+    (siteData === undefined || siteData.image?.src === undefined)
   ) {
     try {
       const scrapedData = await stealthScrapeUrl(url, options);
       html = scrapedData.html;
       siteData = await scrapeMetaTags(url, html);
-      siteData.largestImage = scrapedData.largestImage;
     } catch (err) {
       console.log(err);
       errors.push(err);
@@ -77,8 +77,9 @@ export const scrapeSite = async (url: string, options?: ScrapeOptions) => {
 
 // Use cheerio (jQuery like selector for html) to fetch site meta tags
 const scrapeMetaTags = async (url: string, html: any) => {
-  const $ = require("cheerio").default.load(html);
+  console.log("scrapeMetaTags");
 
+  const $ = require("cheerio").default.load(html);
   const getMetatag = (name: string) =>
     $(`meta[name=${name}]`).attr("content") ||
     $(`meta[name="og:${name}"]`).attr("content") ||
@@ -96,7 +97,12 @@ const scrapeMetaTags = async (url: string, html: any) => {
     mimetype: "",
   };
 
-  if (await checkIfValidImageUrl(image.src)) {
+  let validImage = false;
+  if (image.src) {
+    validImage = await checkIfValidImageUrl(image.src);
+  }
+
+  if (validImage) {
     console.log("probing ...", image.src);
     const result = await probe(image.src);
     image.width = result.width;
@@ -122,7 +128,6 @@ const stealthScrapeUrl = async (url: string, options?: ScrapeOptions) => {
   console.log("stealthScrapeUrl hit");
 
   let html;
-  let largestImage;
 
   await puppeteer
     .use(StealthPlugin())
@@ -149,60 +154,10 @@ const stealthScrapeUrl = async (url: string, options?: ScrapeOptions) => {
       // fs.writeFile("example.html", html);
       // await page.screenshot({ path: 'example.png' });
 
-      // Check through images in site for largest image to use incase site image not found
-      largestImage = await page.evaluate(() => {
-        const imageLargest = () => {
-          let best = null;
-          let images = document.getElementsByTagName("img");
-          for (let img of images as any) {
-            if (
-              imageSize(img).width * imageSize(img).height >
-              imageSize(best).width * imageSize(best).height
-            ) {
-              best = img;
-            }
-          }
-          return best;
-        };
-
-        const imageSize = (img: HTMLImageElement) => {
-          if (!img) {
-            return {
-              width: 0,
-              height: 0,
-            };
-          }
-
-          return {
-            width: img.naturalWidth,
-            height: img.naturalHeight,
-          };
-        };
-
-        const imageSrc = (img: HTMLImageElement) => {
-          if (!img) {
-            return null;
-          }
-          return img.src;
-        };
-
-        let image = imageLargest();
-        let size = imageSize(image);
-
-        return {
-          src: imageSrc(image),
-          size: {
-            width: size.width,
-            height: size.height,
-          },
-        };
-      });
-
       await browser.close();
     });
 
   return {
     html: html,
-    largestImage: largestImage,
   };
 };
