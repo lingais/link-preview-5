@@ -32,9 +32,8 @@ export const sanitizeWebUrl = (url: any) => {
 };
 
 export const extractHostname = (url: string) => {
-  var hostname;
+  var hostname: string;
   //find & remove protocol (http, ftp, etc.) and get hostname
-
   if (url.indexOf("//") > -1) {
     hostname = url.split("/")[2];
   } else {
@@ -45,7 +44,6 @@ export const extractHostname = (url: string) => {
   hostname = hostname.split(":")[0];
   //find & remove "?"
   hostname = hostname.split("?")[0];
-
   return hostname;
 };
 

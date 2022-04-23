@@ -11,7 +11,6 @@ app.get("/healthz", (req: any, res: any) => {
   return res.status(200).end();
 });
 
-// predicate the router with a check and bail out when needed
 app.use((req, res, next) => {
   if (req.headers["x-api-key"] != accesskey) return res.status(403).end();
   next();
