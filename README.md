@@ -18,8 +18,6 @@ Optional boolean parameters "stealth", "search", "validate" (all default to true
 
 Link preview for [https://www.youtube.com/](https://www.youtube.com/)
 
-Preview route: [https://favorited-link-preview.herokuapp.com/api/link-preview?url=https://www.youtube.com/](https://favorited-link-preview.herokuapp.com/api/link-preview?url=https://www.youtube.com/)
-
 Result:
 
 ```
