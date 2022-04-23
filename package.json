@@ -2,6 +2,7 @@
   "name": "url-preview-api",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "scripts": {
     "start": "ts-node index.ts",
     "docker:build:local": "docker build -t woodstock-url-preview -f Dockerfile .",
