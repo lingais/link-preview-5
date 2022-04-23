@@ -1,11 +1,11 @@
 {
-  "name": "link-preview-api",
+  "name": "url-preview-api",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "start": "ts-node index.ts",
-    "docker:build:local": "docker build -t woodstock-link-preview -f Dockerfile .",
-    "docker:build:prod": "docker build -t 324792451081.dkr.ecr.ap-northeast-1.amazonaws.com/woodstock-link-preview -f Dockerfile ."
+    "docker:build:local": "docker build -t woodstock-url-preview -f Dockerfile .",
+    "docker:build:prod": "docker build -t 324792451081.dkr.ecr.ap-northeast-1.amazonaws.com/woodstock-url-preview -f Dockerfile ."
   },
   "dependencies": {
     "@braintree/sanitize-url": "^5.0.2",
