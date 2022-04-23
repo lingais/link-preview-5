@@ -33,7 +33,11 @@ export interface ScrapeOptions {
 }
 
 export const scrapeSite = async (url: string, options?: ScrapeOptions) => {
+  console.log("scrapeSite");
+  console.log(options);
+
   let html: any;
+  let largestImage: any;
   let errors: Array<any> = [];
   let siteData: SiteData | undefined;
 
@@ -60,7 +64,23 @@ export const scrapeSite = async (url: string, options?: ScrapeOptions) => {
     try {
       const scrapedData = await stealthScrapeUrl(url, options);
       html = scrapedData.html;
-      siteData = await scrapeMetaTags(url, html);
+      largestImage = scrapedData.largestImage;
+
+      if (html) {
+        siteData = await scrapeMetaTags(url, html);
+        console.log(siteData);
+      }
+
+      if (largestImage && !siteData.image.src) {
+        console.log("probing", largestImage);
+        const result = await probe(largestImage);
+        siteData.image = {
+          src: largestImage,
+          width: result.width,
+          height: result.height,
+          mimetype: result.mime,
+        };
+      }
     } catch (err) {
       console.log(err);
       errors.push(err);
@@ -75,7 +95,7 @@ export const scrapeSite = async (url: string, options?: ScrapeOptions) => {
 
 // Use cheerio (jQuery like selector for html) to fetch site meta tags
 const scrapeMetaTags = async (url: string, html: any) => {
-  console.log("scrapeMetaTags");
+  console.log("scrapeMetaTags", url);
 
   const $ = require("cheerio").default.load(html);
   const getMetatag = (name: string) =>
@@ -95,6 +115,7 @@ const scrapeMetaTags = async (url: string, html: any) => {
     mimetype: "",
   };
 
+  console.log("image", image.src);
   let validImage = false;
   if (image.src) {
     validImage = await checkIfValidImageUrl(image.src);
@@ -123,9 +144,9 @@ const scrapeMetaTags = async (url: string, html: any) => {
 // Additional fallback using stealth puppeteer see "https://github.com/berstend/puppeteer-extra/wiki/Beginner:-I'm-new-to-scraping-and-being-blocked"
 // For sites such as https://www.fiverr.com/sorich1/fix-bugs-and-build-any-laravel-php-and-vuejs-projects, https://www.netflix.com/gb/title/70136120
 const stealthScrapeUrl = async (url: string, options?: ScrapeOptions) => {
-  console.log("stealthScrapeUrl");
+  console.log("stealthScrapeUrl", url);
 
-  let html;
+  let html: any, largestImage: any;
   await puppeteer
     .use(StealthPlugin())
     .use(
@@ -151,10 +172,41 @@ const stealthScrapeUrl = async (url: string, options?: ScrapeOptions) => {
       // fs.writeFile("example.html", html);
       // await page.screenshot({ path: 'example.png' });
 
+      // Check through images in site for largest image to use incase site image not found
+      largestImage = await page.evaluate(() => {
+        const imageLargest = () => {
+          let best = null;
+          let images = document.getElementsByTagName("img");
+          for (let img of images as any) {
+            if (imageSize(img) > imageSize(best)) {
+              best = img;
+            }
+          }
+          return best;
+        };
+        const imageSize = (img: HTMLImageElement) => {
+          if (!img) {
+            return 0;
+          }
+          return img.naturalWidth * img.naturalHeight;
+        };
+        const imageSrc = (img: HTMLImageElement) => {
+          if (!img) {
+            return null;
+          }
+          return img.src;
+        };
+        return imageSrc(imageLargest());
+      });
+
       await browser.close();
+    })
+    .catch((e) => {
+      console.log(e);
     });
 
   return {
-    html: html,
+    html,
+    largestImage,
   };
 };
