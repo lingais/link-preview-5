@@ -39,7 +39,6 @@ export const scrapeSite = async (url: string, options?: ScrapeOptions) => {
 
   // First try standard request using axios
   try {
-    console.log("axios calling", url);
     const res = await axios.get(url.toString());
     html = res.data;
   } catch (err) {
@@ -102,7 +101,7 @@ const scrapeMetaTags = async (url: string, html: any) => {
   }
 
   if (validImage) {
-    console.log("probing ...", image.src);
+    console.log("probing", image.src);
     const result = await probe(image.src);
     image.width = result.width;
     image.height = result.height;
@@ -124,10 +123,9 @@ const scrapeMetaTags = async (url: string, html: any) => {
 // Additional fallback using stealth puppeteer see "https://github.com/berstend/puppeteer-extra/wiki/Beginner:-I'm-new-to-scraping-and-being-blocked"
 // For sites such as https://www.fiverr.com/sorich1/fix-bugs-and-build-any-laravel-php-and-vuejs-projects, https://www.netflix.com/gb/title/70136120
 const stealthScrapeUrl = async (url: string, options?: ScrapeOptions) => {
-  console.log("stealthScrapeUrl hit");
+  console.log("stealthScrapeUrl");
 
   let html;
-
   await puppeteer
     .use(StealthPlugin())
     .use(

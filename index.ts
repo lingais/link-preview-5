@@ -23,8 +23,6 @@ app.get(`/preview`, async (req, res, next) => {
     return res.status(400).json(params.errors[0]);
   }
 
-  console.log(params.data?.stealth);
-
   const preview = await getLinkPreviewData(
     params.data.url,
     params.data?.stealth
