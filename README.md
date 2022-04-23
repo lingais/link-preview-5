@@ -22,17 +22,20 @@ Result:
 
 ```
 {
-  "errors": [
-    null
-  ],
+  "errors": [],
   "success": true,
   "result": {
     "siteData": {
       "url": "https://www.youtube.com/",
       "title": "YouTube",
-      "favicon": "https://www.youtube.com/s/desktop/6b6f031c/img/favicon.ico",
-      "description": "Enjoy the videos and music that you love, upload original content and share it all with friends, family and the world on YouTube.",
-      "image": "https://www.youtube.com/img/desktop/yt_1200.png"
+      "favicon": "https://www.youtube.com/s/desktop/7c6fa3df/img/favicon.ico",
+      "description": "YouTube でお気に入りの動画や音楽を楽しみ、オリジナルのコンテンツをアップロードして友だちや家族、世界中の人たちと共有しましょう。",
+      "image": {
+          "src": "https://www.youtube.com/img/desktop/yt_1200.png",
+          "width": 1200,
+          "height": 1200,
+          "mimetype": "image/png"
+      }
     }
   }
 }

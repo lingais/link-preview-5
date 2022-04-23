@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "ts-node index.ts",
-    "docker:build:local": "docker build -t 324792451081.dkr.ecr.ap-northeast-1.amazonaws.com/woodstock-link-preview -f Dockerfile .",
+    "docker:build:local": "docker build -t woodstock-link-preview -f Dockerfile .",
     "docker:build:prod": "docker build -t 324792451081.dkr.ecr.ap-northeast-1.amazonaws.com/woodstock-link-preview -f Dockerfile ."
   },
   "dependencies": {
