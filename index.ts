@@ -2,7 +2,7 @@ import cors from "cors";
 import express from "express";
 import { getLinkPreviewData, getLinkPreviewParams } from "./preview";
 
-const accesskey = require("./accesskey.json").key;
+const accesskey = process.env.ACCESS_KEY || require("./accesskey.json").key;
 const app = express();
 
 app.use(cors());

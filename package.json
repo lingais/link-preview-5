@@ -1,9 +1,11 @@
 {
-  "name": "link-preview",
+  "name": "link-preview-api",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "ts-node index.ts"
+    "start": "ts-node index.ts",
+    "docker:build:local": "docker build -t 324792451081.dkr.ecr.ap-northeast-1.amazonaws.com/woodstock-link-preview -f Dockerfile .",
+    "docker:build:prod": "docker build -t 324792451081.dkr.ecr.ap-northeast-1.amazonaws.com/woodstock-link-preview -f Dockerfile ."
   },
   "dependencies": {
     "@braintree/sanitize-url": "^5.0.2",
@@ -11,7 +13,6 @@
     "cheerio": "^1.0.0-rc.10",
     "paapi5-nodejs-sdk": "^1.1.0",
     "probe-image-size": "^7.2.3",
-    "psl": "^1.8.0",
     "puppeteer": "^5.5.0",
     "puppeteer-extra": "^3.1.18",
     "puppeteer-extra-plugin-adblocker": "^2.11.11",

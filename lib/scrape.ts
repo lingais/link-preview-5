@@ -15,7 +15,6 @@ export interface SiteData {
   image?: SiteDataImage;
   author?: string;
   siteName?: string;
-  largestImage?: SiteDataImage;
 }
 
 export interface SiteDataImage {
@@ -107,7 +106,7 @@ const scrapeMetaTags = async (url: string, html: any) => {
     const result = await probe(image.src);
     image.width = result.width;
     image.height = result.height;
-    image.mimetype = result.type;
+    image.mimetype = result.mime;
   }
 
   return {
