@@ -4,7 +4,7 @@ import StealthPlugin from "puppeteer-extra-plugin-stealth";
 import AdblockerPlugin from "puppeteer-extra-plugin-adblocker";
 import axios from "axios";
 import UserAgent from "user-agents";
-import { checkIfValidImageUrl } from "../preview";
+import { checkIfValidImageUrl } from "../pages/api/preview";
 var probe = require("probe-image-size");
 
 export interface SiteData {
@@ -43,7 +43,7 @@ export const scrapeSite = async (url: string, options?: ScrapeOptions) => {
 
   // First try standard request using axios
   try {
-    const res = await axios.get(url.toString());
+    const res = await axios.get(url);
     html = res.data;
   } catch (err) {
     console.log("error calling", url);
@@ -71,7 +71,7 @@ export const scrapeSite = async (url: string, options?: ScrapeOptions) => {
         console.log(siteData);
       }
 
-      if (largestImage && !siteData.image.src) {
+      if (largestImage && !siteData?.image?.src) {
         console.log("probing", largestImage);
         const result = await probe(largestImage);
         siteData.image = {
@@ -115,7 +115,6 @@ const scrapeMetaTags = async (url: string, html: any) => {
     mimetype: "",
   };
 
-  console.log("image", image.src);
   let validImage = false;
   if (image.src) {
     validImage = await checkIfValidImageUrl(image.src);
@@ -141,13 +140,13 @@ const scrapeMetaTags = async (url: string, html: any) => {
   };
 };
 
-// Additional fallback using stealth puppeteer see "https://github.com/berstend/puppeteer-extra/wiki/Beginner:-I'm-new-to-scraping-and-being-blocked"
-// For sites such as https://www.fiverr.com/sorich1/fix-bugs-and-build-any-laravel-php-and-vuejs-projects, https://www.netflix.com/gb/title/70136120
+// Additional fallback using stealth puppeteer
 const stealthScrapeUrl = async (url: string, options?: ScrapeOptions) => {
   console.log("stealthScrapeUrl", url);
 
   let html: any, largestImage: any;
-  await puppeteer
+
+  let browser = await puppeteer
     .use(StealthPlugin())
     .use(
       AdblockerPlugin({
@@ -156,54 +155,51 @@ const stealthScrapeUrl = async (url: string, options?: ScrapeOptions) => {
     )
     .launch({
       args: ["--no-sandbox"],
-    })
-    .then(async (browser) => {
-      const page = await browser.newPage();
-
-      // Set user agent for additional stealth, see https://github.com/berstend/puppeteer-extra/issues/155
-      const userAgent = new UserAgent();
-      await page.setUserAgent(userAgent.toString());
-
-      await page.goto(url, options?.stealthOptions?.gotoOptions);
-      html = await page.evaluate(() => document.querySelector("*")?.outerHTML);
-
-      // Debugging
-      // const fs = require("fs");
-      // fs.writeFile("example.html", html);
-      // await page.screenshot({ path: 'example.png' });
-
-      // Check through images in site for largest image to use incase site image not found
-      largestImage = await page.evaluate(() => {
-        const imageLargest = () => {
-          let best = null;
-          let images = document.getElementsByTagName("img");
-          for (let img of images as any) {
-            if (imageSize(img) > imageSize(best)) {
-              best = img;
-            }
-          }
-          return best;
-        };
-        const imageSize = (img: HTMLImageElement) => {
-          if (!img) {
-            return 0;
-          }
-          return img.naturalWidth * img.naturalHeight;
-        };
-        const imageSrc = (img: HTMLImageElement) => {
-          if (!img) {
-            return null;
-          }
-          return img.src;
-        };
-        return imageSrc(imageLargest());
-      });
-
-      await browser.close();
-    })
-    .catch((e) => {
-      console.log(e);
     });
+
+  console.log("browser launched");
+
+  const page = await browser.newPage();
+  // Set user agent for additional stealth, see https://github.com/berstend/puppeteer-extra/issues/155
+  const userAgent = new UserAgent();
+  await page.setUserAgent(userAgent.toString());
+  await page.goto(url, options?.stealthOptions?.gotoOptions);
+  html = await page.evaluate(() => document.querySelector("*")?.outerHTML);
+
+  // Debugging
+  // const fs = require("fs");
+  // fs.writeFile("example.html", html);
+  // await page.screenshot({ path: 'example.png' });
+
+  // Check through images in site for largest image to use incase site image not found
+  largestImage = await page.evaluate(() => {
+    const imageLargest = () => {
+      let best = null;
+      let images = document.getElementsByTagName("img");
+      for (let img of images as any) {
+        if (imageSize(img) > imageSize(best)) {
+          best = img;
+        }
+      }
+      return best;
+    };
+    const imageSize = (img: HTMLImageElement) => {
+      if (!img) {
+        return 0;
+      }
+      return img.naturalWidth * img.naturalHeight;
+    };
+    const imageSrc = (img: HTMLImageElement) => {
+      if (!img) {
+        return null;
+      }
+      return img.src;
+    };
+    return imageSrc(imageLargest());
+  });
+
+  await browser.close();
+  console.log("browser closed");
 
   return {
     html,

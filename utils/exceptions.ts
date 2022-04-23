@@ -18,7 +18,7 @@ export const isExceptionSite = (url: string, exceptionUrls: Array<string>) => {
 
 // Depending on exception sites, change scrape options and assign extra data
 // Currently this API contains exceptions for sites such Amazon, Twitter, etc.
-export const getExceptionSiteData = async (url: string, stealth?: boolean) => {
+export const getExceptionSiteData = (url: string, stealth?: boolean) => {
   let exceptionData: ExceptionSiteData = {};
 
   // If twitter site, make stealth scrape wait until no more than 0 network connections for at least 500 ms

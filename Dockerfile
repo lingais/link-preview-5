@@ -12,4 +12,7 @@ RUN yarn
 # Copy all other source code to work directory
 ADD . /usr/src/app
 
+EXPOSE 8088
+
+RUN [ "yarn", "build" ]
 CMD [ "yarn", "start" ]

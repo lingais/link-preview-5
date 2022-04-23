@@ -1,6 +1,12 @@
 import { sanitizeUrl } from "@braintree/sanitize-url";
 
 export const invalidUrlString = "about:blank";
+export const baseUrl =
+  process.env.SITE_URL || process.env.VERCEL_URL
+    ? process.env.SITE_URL
+      ? process.env.SITE_URL
+      : "https://" + process.env.VERCEL_URL
+    : "";
 
 export function isString(x: any): x is string {
   return typeof x === "string";

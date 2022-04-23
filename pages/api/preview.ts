@@ -1,9 +1,46 @@
+import type { NextApiRequest, NextApiResponse } from "next";
 import axios from "axios";
-import { ScrapeOptions, scrapeSite, SiteData } from "./lib/scrape";
-import { isString, isValidWebUrl, stringToBoolParam } from "./utils";
-import { getExceptionSiteData } from "./utils/exceptions";
+import { ScrapeOptions, scrapeSite, SiteData } from "../../lib/scrape";
+import { isString, isValidWebUrl, stringToBoolParam } from "../../utils";
+import { getExceptionSiteData } from "../../utils/exceptions";
+import withAllowCORS from "../../middleware/withAllowCORS";
 
-export const getLinkPreviewParams = async (req: any) => {
+interface ApiData {
+  success: boolean;
+  result?: {
+    siteData?: SiteData;
+  };
+  errors?: Array<any>;
+  error?: any;
+}
+
+const handler = async (req: NextApiRequest, res: NextApiResponse<ApiData>) => {
+  const params = getLinkPreviewParams(req);
+  if (params.errors.length == 0) {
+    const { url, stealth } = params.data;
+
+    console.log(params.data);
+
+    switch (req.method) {
+      case "GET":
+        try {
+          const linkPreviewData = await getLinkPreviewData(url, stealth);
+          return res.status(200).json(linkPreviewData);
+        } catch {
+          res.status(500).end();
+        }
+
+      default:
+        return res
+          .status(404)
+          .json({ success: false, error: `Method ${req.method} not allowed` });
+    }
+  } else {
+    return res.status(400).json({ success: false, errors: params.errors });
+  }
+};
+
+export const getLinkPreviewParams = (req: any) => {
   const { url, stealth } = req.query;
   let urlString = "";
   let stealthBool: boolean | undefined;
@@ -51,7 +88,7 @@ export const getLinkPreviewData = async (url: string, stealth?: boolean) => {
 
   // Check exception sites - adjust scrape options and assign extra data if needed
   // Currently this API contains exceptions for sites such Amazon, Twitter, etc.
-  const exceptionData = await getExceptionSiteData(url, stealth);
+  const exceptionData = getExceptionSiteData(url, stealth);
   if (exceptionData.scrapeOptions) scrapeOptions = exceptionData.scrapeOptions;
   if (scrapeOptions.scrape) {
     // Scrape given url/link to get site data
@@ -75,17 +112,21 @@ export const getLinkPreviewData = async (url: string, stealth?: boolean) => {
 
 export const checkIfValidImageUrl = async (imageUrl: string) => {
   try {
+    // handle url format like //cdn1.edgedatg.com/tml/assets/content/abc/abc-icon-2021.png
+    if (imageUrl.startsWith("//")) {
+      imageUrl = `https:${imageUrl}`;
+    }
+
+    console.log("image url is", imageUrl);
     const response = await axios.get(imageUrl);
-    if (
+    return (
       response.status == 200 &&
       response.headers["content-type"]?.match(/(image)+\//g)?.length != 0
-    ) {
-      return true;
-    } else {
-      return false;
-    }
+    );
   } catch (err) {
     console.log(err);
     return false;
   }
 };
+
+export default withAllowCORS(handler);
