@@ -172,6 +172,7 @@ const stealthScrapeUrl = async (url: string, options?: ScrapeOptions) => {
   // await page.screenshot({ path: 'example.png' });
 
   // Check through images in site for largest image to use incase site image not found
+  // todo: filter out the images in 'more twitter' section
   largestImage = await page.evaluate(() => {
     const imageLargest = () => {
       let best = null;
