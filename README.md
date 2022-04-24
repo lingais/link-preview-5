@@ -10,7 +10,7 @@ For link previews, make GET requests to `/preview?url=` with a valid `x-api-key`
 
 Requires "url" parameter to fetch link preview.
 
-Optional boolean parameters "stealth", "search", "validate" (all default to true):
+Optional boolean parameters "stealth":
 
 "stealth" - includes stealth browser emulation (longer fetch but very accurate results)
 
