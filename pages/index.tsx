@@ -51,8 +51,7 @@ export default function Home() {
           Requires "url" parameter to fetch link preview.
           <br />
           <br />
-          Optional boolean parameters "stealth", "search", "validate" (all
-          default to true):
+          Optional boolean parameters "stealth" (default to true):
         </p>
         <ul style={{ paddingInlineStart: 20 }}>
           <li>
